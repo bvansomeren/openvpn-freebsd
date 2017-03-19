@@ -1,0 +1,42 @@
+---
+# tasks file for bvansomeren.openvpn-freebsd-server
+
+- name: ensure openvpn is installed
+  package:
+    name: openvpn
+    state: present
+  tags:
+  - install
+
+- name: ensure openvpn can be started
+  command: sysrc -f /etc/rc.conf openvpn_enable=YES
+  tags:
+  - install
+  - init
+
+- name: ensure openvpn config and key folder
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - "{{ openvpn_folder }}"
+  - "{{ openvpn_key_folder }}"
+  - "{{ openvpn_client_folder }}"
+  tags:
+  - configure
+
+- name: ensure x509 defaults are in place
+  copy:
+    force: no
+    src: "{{ item.src }}" 
+    dest: "{{ item.dest }}"
+    remote_src: yes
+  with_items:
+  - src: /usr/local/share/easy-rsa/x509-types/ca
+    dest: "{{ openvpn_key_folder }}/ca"
+  - src: /usr/local/share/easy-rsa/x509-types/client
+    dest: "{{ openvpn_key_folder }}/client"
+  - src: /usr/local/share/easy-rsa/x509-types/server
+    dest: "{{ openvpn_key_folder }}/server" 
+  tags:
+  - configure

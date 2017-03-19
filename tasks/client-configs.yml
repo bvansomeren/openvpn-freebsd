@@ -1,0 +1,63 @@
+---
+
+- name: ensure client key
+  command: openssl req -nodes -newkey rsa:{{ openvpn_default_keysize }} -keyout {{ item.cn }}.key -out {{ item.cn }}.csr -days {{ item.validity | default(openvpn_default_client_expire) }} -subj /CN=OpenVPN-Client-{{ inventory_hostname }}-{{ item.cn }}/
+  args:
+    chdir: "{{ openvpn_key_folder }}"
+    creates: "{{ item.cn }}.key"
+  with_items: "{{ openvpn_clients }}"
+  tags:
+  - client
+
+- name: ensure client key is signed
+  command: openssl x509 -req -in {{ item.cn }}.csr -out {{ item.cn }}.crt -CA ca.crt -CAkey ca-key.pem -sha256 -days {{ item.validity | default(openvpn_default_client_expire) }} -extfile client
+  args:
+    chdir: "{{ openvpn_key_folder }}"
+    creates: "{{ item.cn }}.crt"
+  with_items: "{{ openvpn_clients }}"
+  tags:
+  - client
+
+- name: register server ca key
+  slurp:
+    src: "{{ openvpn_key_folder }}/ca.crt"
+  register: ca_cert
+  tags:
+  - client
+
+- name: register tls-auth key
+  slurp:
+    src: "{{ openvpn_key_folder }}/ta.key"
+  register: tls_auth
+  tags:
+  - client
+
+- name: register client certs
+  slurp:
+    src: "{{ openvpn_key_folder }}/{{ item.cn }}.crt"
+  with_items: "{{ openvpn_clients }}"
+  register: client_certs
+  tags:
+  - client
+
+- name: register client keys
+  slurp:
+    src: "{{ openvpn_key_folder }}/{{ item.cn }}.key"
+  with_items: "{{ openvpn_clients }}"
+  register: client_keys
+  tags:
+  - client
+
+- name: generate client config
+  template:
+    src: client.ovpn
+    dest: "{{ openvpn_client_folder }}/{{ item.0.item.cn }}-{{ inventory_hostname }}.ovpn"
+    owner: root
+    group: wheel
+    mode: 0400
+  with_together:
+    - "{{ client_certs.results }}"
+    - "{{ client_keys.results }}"
+  tags:
+  - client
+

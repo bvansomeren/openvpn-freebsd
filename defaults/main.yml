@@ -1,0 +1,98 @@
+---
+# defaults file for bvansomeren.openvpn-freebsd-server
+
+openvpn_folder: /usr/local/etc/openvpn
+openvpn_key_folder: "{{ openvpn_folder }}/keys"
+openvpn_client_folder: "{{ openvpn_folder }}/client"
+
+openvpn_proto: udp
+openvpn_port: 1194
+openvpn_server_hostname: "{{inventory_hostname}}"
+openvpn_cipher: "AES-256-CBC"
+
+openvpn_default_keysize: 2048
+openvpn_default_ca_expire: 3650
+openvpn_default_cert_expire: 3650
+openvpn_default_client_expire: 365
+openvpn_default_keepalive_ping: "10"
+openvpn_default_keepalive_reset: "120"
+openvpn_default_server_ip: "10.8.0.0 255.255.255.0"
+
+openvpn_default_configuration:
+- name: dev
+  value: tun
+- name: ifconfig-pool-persist
+  value: ipp.txt
+- name: server
+  value: "{{ openvpn_default_server_ip }}"
+- name: proto
+  value: "{{ openvpn_proto }}"
+- name: port
+  value: "{{ openvpn_port }}"
+- name: cipher
+  value: "{{ openvpn_cipher }}"
+- name: user
+  value: nobody
+- name: group
+  value: nobody
+- name: dh 
+  value: "{{ openvpn_key_folder }}/dh.pem"
+- name: ca 
+  value: "{{ openvpn_key_folder }}/ca.crt"
+- name: cert 
+  value: "{{ openvpn_key_folder }}/server.crt"
+- name: key 
+  value: "{{ openvpn_key_folder }}/server.key"
+- name: tls-auth
+  value: "{{ openvpn_key_folder }}/ta.key 0"
+- name: topology
+  value: subnet
+- name: auth
+  value: SHA256
+- name: keepalive
+  value: "{{ openvpn_default_keepalive_ping }} {{ openvpn_default_keepalive_reset }}"
+- name: persist-key
+- name: persist-tun
+- name: status
+  value: openvpn-status.log
+- name: verb
+  value: 3
+
+openvpn_configuration: []
+
+openvpn_client_push_routes: []
+
+openvpn_client_default_configuration:
+- name: client
+- name: tls-client
+- name: auth
+  value: SHA256
+- name: cipher
+  value: "{{ openvpn_cipher }}"
+- name: remote-cert-tls
+  value: server
+- name: tls-version-min
+  value: 1.2
+- name: proto
+  value: "{{openvpn_proto}}"
+- name: remote
+  value: "{{openvpn_server_hostname}} {{openvpn_port}}"
+- name: dev
+  value: tun
+- name: resolv-retry
+  value: 5
+- name: nobind
+- name: keepalive
+  value: "{{ openvpn_default_keepalive_ping }} {{ openvpn_default_keepalive_reset }}"
+- name: persist-key
+- name: persist-tun
+- name: verb
+  value: 3
+- name: route-method
+  value: exe
+- name: route-delay
+  value: 2
+- name: verify-x509-name
+  value: "OpenVPN-Server-{{inventory_hostname}} name"
+
+openvpn_client_configuration: []

@@ -1,0 +1,9 @@
+---
+
+- name: ensure configuration is templated on openvpn server
+  template:
+    dest: "{{ openvpn_folder }}/openvpn.conf"
+    src: "openvpn.conf"
+  notify: restart openvpn
+  tags:
+  - configure

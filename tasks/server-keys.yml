@@ -1,0 +1,46 @@
+---
+
+- name: ensure CA key
+  command: openssl req -nodes -newkey rsa:{{ openvpn_default_keysize }} -keyout ca-key.pem -out ca-csr.pem -days {{ openvpn_default_ca_expire }} -subj /CN=OpenVPN-CA-{{inventory_hostname}}/
+  args:
+    chdir: "{{ openvpn_key_folder }}"
+    creates: ca-key.pem
+  tags:
+  - ca
+
+- name: sign CA key
+  command: openssl x509 -req -in ca-csr.pem -out ca.crt -CAcreateserial -signkey ca-key.pem -sha256 -days {{ openvpn_default_ca_expire }} -extfile ca
+  args:
+    chdir: "{{ openvpn_key_folder }}"
+    creates: ca.crt
+  tags:
+  - ca
+
+- name: ensure server key
+  command: openssl req -nodes -newkey rsa:{{ openvpn_default_keysize }} -keyout server.key -out server.csr -days {{ openvpn_default_cert_expire }} -subj /CN=OpenVPN-Server-{{inventory_hostname}}/
+  args:
+    chdir: "{{ openvpn_key_folder }}"
+    creates: server.key
+
+- name: protect server key
+  file:
+    path: "{{ openvpn_key_folder }}/server.key"
+    mode: 0400
+
+- name: sign server key
+  command: openssl x509 -req -in server.csr -out server.crt -CA ca.crt -CAkey ca-key.pem -sha256 -days {{ openvpn_default_cert_expire }} -CAcreateserial -extfile server
+  args:
+    chdir: "{{ openvpn_key_folder }}"
+    creates: server.crt
+
+- name: ensure generated dh params
+  command: openssl dhparam -out {{ openvpn_key_folder }}/dh.pem {{openvpn_default_keysize }}
+  args:
+    chdir: "{{ openvpn_key_folder }}"
+    creates: dh.pem
+
+- name: ensure tls-auth key
+  command: openvpn --genkey --secret ta.key
+  args:
+    chdir: "{{ openvpn_key_folder }}"
+    creates: ta.key
