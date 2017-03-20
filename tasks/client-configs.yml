@@ -1,7 +1,7 @@
 ---
 
 - name: ensure client key
-  command: openssl req -nodes -newkey rsa:{{ openvpn_default_keysize }} -keyout {{ item.cn }}.key -out {{ item.cn }}.csr -days {{ item.validity | default(openvpn_default_client_expire) }} -subj /CN=OpenVPN-Client-{{ inventory_hostname }}-{{ item.cn }}/
+  command: openssl req -new -newkey rsa:{{ openvpn_default_keysize }} {% if item.password is defined %}-passout pass:"{{ item.password }}"{% endif %} -keyout {{ item.cn }}.key -out {{ item.cn }}.csr -days {{ item.validity | default(openvpn_default_client_expire) }} -subj /CN=OpenVPN-Client-{{ inventory_hostname }}-{{ item.cn }}/
   args:
     chdir: "{{ openvpn_key_folder }}"
     creates: "{{ item.cn }}.key"
