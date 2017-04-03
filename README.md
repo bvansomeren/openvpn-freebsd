@@ -1,31 +1,51 @@
-Role Name
+bvansomeren.openvpn-freebsd-server
 =========
 
-A brief description of the role goes here.
+Installs OpenVPN from pkg, creates the CA and creates client certificates.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Tested with FreeBSD 11 base; Does not work in a Jail.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Too many to list; Have a look at defaults/main.yml
+See also the minimal example listed below.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None.
 
 Example Playbook
 ----------------
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+    - hosts: freebsd-test1
+  	   user: nonpriv_user
+  	   become: yes
+  	   become_user: root
+  	   vars:
+    	 openvpn_default_server_ip: "10.2.1.0 255.255.255.0"
+    	 openvpn_port: 443
+    	 openvpn_proto: tcp
+    	 openvpn_configuration:
+    	 - name: comp-lzo
+    	 openvpn_client_configuration:
+    	 - name: comp-lzo
+    	 openvpn_clients:
+    	 - cn: user1
+      		validity: 3650
+    	 - cn: user2-password
+      	 	validity: 365
+      		password: somesecurepassword
+    	 openvpn_client_push_routes:
+    	 - "10.2.0.0 255.255.255.0"
+  	 	 roles:
+  		 - bvansomeren.openvpn-freebsd-server
 
 License
 -------
@@ -35,4 +55,3 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
