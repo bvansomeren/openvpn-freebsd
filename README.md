@@ -25,9 +25,9 @@ Example Playbook
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
     - hosts: freebsd-test1
-  	   user: nonpriv_user
+  	   user: nonpriv\_user
   	   become: yes
-  	   become_user: root
+  	   become\_user: root
   	   vars:
     	 openvpn_default_server_ip: "10.2.1.0 255.255.255.0"
     	 openvpn_port: 443
