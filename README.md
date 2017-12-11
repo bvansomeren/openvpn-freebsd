@@ -1,7 +1,12 @@
 bvansomeren.openvpn-freebsd-server
 =========
 
-Installs OpenVPN from pkg, creates the CA and creates client certificates.
+Installs OpenVPN from pkg, creates the CA and creates client certificates.  
+Some TODO issues:  
+* Removal of users
+* Extending certificates
+* Use EasyRSA to manage certificates, CA etc.
+
 
 Requirements
 ------------
