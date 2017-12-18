@@ -12,6 +12,7 @@ Requirements
 ------------
 
 Tested with FreeBSD 11 base; Does not work in a Jail.
+TODO: Setup jail using VMIMAGE
 
 Role Variables
 --------------
